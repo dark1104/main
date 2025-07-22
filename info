@@ -1,0 +1,32 @@
+[root@che172rocky96 ~]# kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+namespace/kube-flannel unchanged
+clusterrole.rbac.authorization.k8s.io/flannel unchanged
+clusterrolebinding.rbac.authorization.k8s.io/flannel unchanged
+serviceaccount/flannel unchanged
+configmap/kube-flannel-cfg unchanged
+daemonset.apps/kube-flannel-ds unchanged
+[root@che172rocky96 ~]# kubectl get pods -n kube-system
+NAME                                      READY   STATUS      RESTARTS   AGE
+coredns-5688667fd4-4vhg7                  1/1     Running     0          11d
+helm-install-traefik-crd-q7bjh            0/1     Completed   0          11d
+helm-install-traefik-jszkr                0/1     Completed   0          11d
+local-path-provisioner-774c6665dc-r6xhw   1/1     Running     0          11d
+metrics-server-6f4c6675d5-5w54v           0/1     Running     0          11d
+svclb-traefik-d6566a28-q44rs              2/2     Running     0          11d
+traefik-5d9bccdd56-7b5v8                  1/1     Running     0          10d
+[root@che172rocky96 ~]# kubectl get daemonset kube-flannel-ds -n kube-system
+Error from server (NotFound): daemonsets.apps "kube-flannel-ds" not found
+[root@che172rocky96 ~]# kubectl describe node che172rocky96.che.aricent.com | grep -i taint
+Taints:             <none>
+[root@che172rocky96 ~]# kubectl logs -n kube-system -l app=flannel
+No resources found in kube-system namespace.
+[root@che172rocky96 ~]# kubectl get pods -n kube-system -o wide
+NAME                                      READY   STATUS      RESTARTS   AGE   IP           NODE                            NOMINATED NODE   READINESS GATES
+coredns-5688667fd4-4vhg7                  1/1     Running     0          11d   10.42.0.6    che172rocky96.che.aricent.com   <none>           <none>
+helm-install-traefik-crd-q7bjh            0/1     Completed   0          11d   10.42.0.4    che172rocky96.che.aricent.com   <none>           <none>
+helm-install-traefik-jszkr                0/1     Completed   0          11d   10.42.0.2    che172rocky96.che.aricent.com   <none>           <none>
+local-path-provisioner-774c6665dc-r6xhw   1/1     Running     0          11d   10.42.0.3    che172rocky96.che.aricent.com   <none>           <none>
+metrics-server-6f4c6675d5-5w54v           0/1     Running     0          11d   10.42.0.5    che172rocky96.che.aricent.com   <none>           <none>
+svclb-traefik-d6566a28-q44rs              2/2     Running     0          11d   10.42.0.7    che172rocky96.che.aricent.com   <none>           <none>
+traefik-5d9bccdd56-7b5v8                  1/1     Running     0          10d   10.42.0.58   che172rocky96.che.aricent.com   <none>           <none>
+[root@che172rocky96 ~]#
