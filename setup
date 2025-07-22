@@ -1,0 +1,53 @@
+1. Install k3s
+
+Install -> curl -sfL https://get.k3s.io | sh -
+
+Checking -> a) sudo k3s kubectl get nodes
+            b) which k3s
+            c) k3s kubectl get nodes
+            d) sudo /usr/local/bin/k3s kubectl get nodes
+
+
+sudo ln -s /usr/local/bin/k3s /usr/bin/k3s (create a symlink so sudo can find it)
+
+2. Install Rancher via Helm
+
+curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+
+sudo yum install -y git tar (if missing)
+
+#Install cert-manager
+
+# Add the Jetstack Helm repository
+helm repo add jetstack https://charts.jetstack.io
+
+# Update your local Helm chart repository cache
+helm repo update
+
+kubectl create namespace cert-manager
+
+# Install the cert-manager Helm chart
+helm install cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --set installCRDs=true
+
+#Install Rancher via Helm
+
+# Add Rancher Helm repo
+helm repo add rancher-latest https://releases.rancher.com/server-charts/latest
+helm repo update
+
+# Create namespace
+kubectl create namespace cattle-system
+
+# Install cert-manager (required by Rancher)
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.2/cert-manager.yaml
+
+# Install Rancher
+helm install rancher rancher-latest/rancher \
+  --namespace cattle-system \
+  --set hostname=192.168.91.172.nip.io \
+  --set bootstrapPassword=admin
+  --set replicas=1
+
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml (if Helm cannot find your Kubernetes cluster context)
