@@ -1,0 +1,19 @@
+# goflow2-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: goflow2
+  namespace: default
+spec:
+  selector:
+    app: goflow2
+  ports:
+    - protocol: UDP
+      port: 2055
+      targetPort: 2055
+    - protocol: UDP
+      port: 6343
+      targetPort: 6343
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
