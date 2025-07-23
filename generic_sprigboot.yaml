@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-springboot-app
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-springboot-app
+  template:
+    metadata:
+      labels:
+        app: my-springboot-app
+    spec:
+      containers:
+      - name: my-springboot-app
+        image: your-registry.local:5000/my-springboot-app:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "prod"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-springboot-app
+  namespace: default
+spec:
+  type: ClusterIP
+  selector:
+    app: my-springboot-app
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
