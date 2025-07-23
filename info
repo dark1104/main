@@ -1,8 +1,5 @@
-[root@che172rocky96 goflow2-deployment]# kubectl get pods -n default -l app=goflow2 -o wide
-NAME                       READY   STATUS             RESTARTS      AGE     IP            NODE                            NOMINATED NODE   READINESS GATES
-goflow2-58667858cb-lqc6x   0/1     CrashLoopBackOff   4 (61s ago)   2m31s   10.42.0.166   che172rocky96.che.aricent.com   <none>           <none>
 [root@che172rocky96 goflow2-deployment]# kubectl logs -n default deploy/goflow2
-flag provided but not defined: -format.kafka
+flag provided but not defined: -format.protobuf.fixedlen
 Usage of ./goflow2:
   -addr string
         HTTP server address (default ":8080")
@@ -11,7 +8,7 @@ Usage of ./goflow2:
   -err.int duration
         Maximum errors interval for muting (default 10s)
   -format string
-        Choose the format (available: json, bin, text) (default "json")
+        Choose the format (available: bin, text, json) (default "json")
   -listen string
         listen addresses (default "sflow://:6343,netflow://:2055")
   -logfmt string
