@@ -1,96 +1,39 @@
-# goflow2-deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: goflow2
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: goflow2
-  template:
-    metadata:
-      labels:
-        app: goflow2
-    spec:
-      containers:
-      - name: goflow2
-        image: netsampler/goflow2:latest
-        imagePullPolicy: IfNotPresent
-        args:
-          - -transport.kafka.brokers=sflow-kafka.sflow.svc.cluster.local:9092
-          - -transport=kafka
-          - -transport.kafka.topic=flows
-          - -format=pb
-          - -format.protobuf.fixedlen=true
-        volumeMounts:
-          - name: config
-            mountPath: /conf
-            readOnly: true
-      volumes:
-        - name: config
-          configMap:
-            name: goflow2-config
-#############################
 [root@che172rocky96 goflow2-deployment]# kubectl logs -n default deploy/goflow2
-flag provided but not defined: -format.protobuf.fixedlen
-Usage of ./goflow2:
-  -addr string
-        HTTP server address (default ":8080")
-  -err.cnt int
-        Maximum errors per batch for muting (default 10)
-  -err.int duration
-        Maximum errors interval for muting (default 10s)
-  -format string
-        Choose the format (available: bin, text, json) (default "json")
-  -listen string
-        listen addresses (default "sflow://:6343,netflow://:2055")
-  -logfmt string
-        Log formatter (default "normal")
-  -loglevel string
-        Log level (default "info")
-  -mapping string
-        Configuration file for custom mappings
-  -produce string
-        Producer method (sample or raw) (default "sample")
-  -templates.path string
-        NetFlow/IPFIX templates list (default "/templates")
-  -transport string
-        Choose the transport (available: file, kafka) (default "file")
-  -transport.file string
-        File/console output (empty for stdout)
-  -transport.file.sep string
-        Line separator (default "\n")
-  -transport.kafka.brokers string
-        Kafka brokers list separated by commas (default "127.0.0.1:9092,[::1]:9092")
-  -transport.kafka.compression string
-        Kafka default compression
-  -transport.kafka.flushbytes int
-        Kafka flush bytes (default 104857600)
-  -transport.kafka.flushfreq duration
-        Kafka flush frequency (default 5s)
-  -transport.kafka.hashing
-        Enable partition hashing
-  -transport.kafka.maxmsgbytes int
-        Kafka max message bytes (default 1000000)
-  -transport.kafka.sasl string
-        Use SASL to connect to Kafka, available settings: none, plain, scram-sha256, scram-sha512 (TLS is recommended and the environment variables KAFKA_SASL_USER and KAFKA_SASL_PASS need to be set) (default "none")
-  -transport.kafka.srv string
-        SRV record containing a list of Kafka brokers (or use brokers)
-  -transport.kafka.tls
-        Use TLS to connect to Kafka
-  -transport.kafka.tls.ca string
-        Kafka certificate authority
-  -transport.kafka.tls.client string
-        Kafka client certificate
-  -transport.kafka.tls.insecure
-        Skips TLS verification
-  -transport.kafka.tls.key string
-        Kafka client key
-  -transport.kafka.topic string
-        Kafka topic to produce to (default "flow-messages")
-  -transport.kafka.version string
-        Kafka version (default "2.8.0")
-  -v    Print version
-[root@che172rocky96 goflow2-deployment]#
+time=2025-07-23T10:50:29.723Z level=ERROR msg="error transporter" error="kafka: client has run out of available brokers to talk to: EOF for kafka transport"
+[root@che172rocky96 goflow2-deployment]# kubectl get svc -n default | grep kafka
+kafka                        ClusterIP   10.43.20.47     <none>        9092/TCP                                       23h
+kafka-broker-headless        ClusterIP   None            <none>        9094/TCP,9092/TCP                              23h
+kafka-controller-headless    ClusterIP   None            <none>        9094/TCP,9092/TCP,9093/TCP                     23h
+[root@che172rocky96 goflow2-deployment]# nano goflow2-deployment.yaml
+[root@che172rocky96 goflow2-deployment]# kubectl run -it --rm debug --image=busybox --restart=Never -- sh
+If you don't see a command prompt, try pressing enter.
+/ # nsllokup kafka
+sh: nsllokup: not found
+/ # nslookup kafka
+Server:         10.43.0.10
+Address:        10.43.0.10:53
+
+** server can't find kafka.cluster.local: NXDOMAIN
+
+** server can't find kafka.cluster.local: NXDOMAIN
+
+** server can't find kafka.svc.cluster.local: NXDOMAIN
+
+
+** server can't find kafka.svc.cluster.local: NXDOMAIN
+
+Name:   kafka.default.svc.cluster.local
+Address: 10.43.20.47
+
+** server can't find kafka.che.aricent.com: NXDOMAIN
+
+** server can't find kafka.che.aricent.com: NXDOMAIN
+
+/ # kubectl get pods -n default | grep kafka
+sh: kubectl: not found
+/ # exit
+pod "debug" deleted
+pod default/debug terminated (Error)
+[root@che172rocky96 goflow2-deployment]# kubectl get pods -n default | grep kafka
+kafka-broker-0                      1/1     Running            0              23h
+kafka-controller-0                  1/1     Running            0              23
