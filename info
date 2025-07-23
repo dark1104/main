@@ -1,145 +1,64 @@
 [root@che172rocky96 goflow2-deployment]# kubectl get pods -n default -l app=goflow2 -o wide
-NAME                       READY   STATUS             RESTARTS   AGE     IP            NODE                            NOMINATED NODE   READINESS GATES
-goflow2-56847fd758-7k6gd   0/1     ImagePullBackOff   0          15m     10.42.0.164   che172rocky96.che.aricent.com   <none>           <none>
-goflow2-68844f4fb8-7h68j   0/1     ImagePullBackOff   0          2m20s   10.42.0.165   che172rocky96.che.aricent.com   <none>           <none>
-[root@che172rocky96 goflow2-deployment]# kubectl describe pod -n default goflow2-56847fd758-7k6gd
-Name:             goflow2-56847fd758-7k6gd
-Namespace:        default
-Priority:         0
-Service Account:  default
-Node:             che172rocky96.che.aricent.com/192.168.91.172
-Start Time:       Wed, 23 Jul 2025 15:38:19 +0530
-Labels:           app=goflow2
-                  pod-template-hash=56847fd758
-Annotations:      <none>
-Status:           Pending
-IP:               10.42.0.164
-IPs:
-  IP:           10.42.0.164
-Controlled By:  ReplicaSet/goflow2-56847fd758
-Containers:
-  goflow2:
-    Container ID:
-    Image:         ghcr.io/netsampler/goflow2:v0.6.2
-    Image ID:
-    Port:          <none>
-    Host Port:     <none>
-    Args:
-      -format.kafka
-      -kafka.brokers=kafka:9092
-      -kafka.topic=goflow
-      -kafka.version=2.0.0
-      -kafka.compression=gzip
-      -kafka.flushinterval=1000
-      -format.clickhouse
-      -config=/conf/clickhouse.yaml
-    State:          Waiting
-      Reason:       ImagePullBackOff
-    Ready:          False
-    Restart Count:  0
-    Environment:    <none>
-    Mounts:
-      /conf from config (ro)
-      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-vmgqb (ro)
-Conditions:
-  Type                        Status
-  PodReadyToStartContainers   True
-  Initialized                 True
-  Ready                       False
-  ContainersReady             False
-  PodScheduled                True
-Volumes:
-  config:
-    Type:      ConfigMap (a volume populated by a ConfigMap)
-    Name:      goflow2-config
-    Optional:  false
-  kube-api-access-vmgqb:
-    Type:                    Projected (a volume that contains injected data from multiple sources)
-    TokenExpirationSeconds:  3607
-    ConfigMapName:           kube-root-ca.crt
-    ConfigMapOptional:       <nil>
-    DownwardAPI:             true
-QoS Class:                   BestEffort
-Node-Selectors:              <none>
-Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
-                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
-Events:
-  Type     Reason     Age                 From               Message
-  ----     ------     ----                ----               -------
-  Normal   Scheduled  16m                 default-scheduler  Successfully assigned default/goflow2-56847fd758-7k6gd to che172rocky96.che.aricent.com
-  Normal   Pulling    12m (x5 over 16m)   kubelet            Pulling image "ghcr.io/netsampler/goflow2:v0.6.2"
-  Warning  Failed     12m (x5 over 16m)   kubelet            Failed to pull image "ghcr.io/netsampler/goflow2:v0.6.2": rpc error: code = NotFound desc = failed to pull and unpack image "ghcr.io/netsampler/goflow2:v0.6.2": failed to resolve reference "ghcr.io/netsampler/goflow2:v0.6.2": ghcr.io/netsampler/goflow2:v0.6.2: not found
-  Warning  Failed     12m (x5 over 16m)   kubelet            Error: ErrImagePull
-  Normal   BackOff    65s (x64 over 16m)  kubelet            Back-off pulling image "ghcr.io/netsampler/goflow2:v0.6.2"
-  Warning  Failed     65s (x64 over 16m)  kubelet            Error: ImagePullBackOff
-[root@che172rocky96 goflow2-deployment]# kubectl describe pod -n default goflow2-68844f4fb8-7h68j
-Name:             goflow2-68844f4fb8-7h68j
-Namespace:        default
-Priority:         0
-Service Account:  default
-Node:             che172rocky96.che.aricent.com/192.168.91.172
-Start Time:       Wed, 23 Jul 2025 15:51:24 +0530
-Labels:           app=goflow2
-                  pod-template-hash=68844f4fb8
-Annotations:      <none>
-Status:           Pending
-IP:               10.42.0.165
-IPs:
-  IP:           10.42.0.165
-Controlled By:  ReplicaSet/goflow2-68844f4fb8
-Containers:
-  goflow2:
-    Container ID:
-    Image:         netsampler/goflow2:v0.5.2
-    Image ID:
-    Port:          <none>
-    Host Port:     <none>
-    Args:
-      -format.kafka
-      -kafka.brokers=kafka:9092
-      -kafka.topic=goflow
-      -kafka.version=2.0.0
-      -kafka.compression=gzip
-      -kafka.flushinterval=1000
-      -format.clickhouse
-      -config=/conf/clickhouse.yaml
-    State:          Waiting
-      Reason:       ImagePullBackOff
-    Ready:          False
-    Restart Count:  0
-    Environment:    <none>
-    Mounts:
-      /conf from config (ro)
-      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-8kgf9 (ro)
-Conditions:
-  Type                        Status
-  PodReadyToStartContainers   True
-  Initialized                 True
-  Ready                       False
-  ContainersReady             False
-  PodScheduled                True
-Volumes:
-  config:
-    Type:      ConfigMap (a volume populated by a ConfigMap)
-    Name:      goflow2-config
-    Optional:  false
-  kube-api-access-8kgf9:
-    Type:                    Projected (a volume that contains injected data from multiple sources)
-    TokenExpirationSeconds:  3607
-    ConfigMapName:           kube-root-ca.crt
-    ConfigMapOptional:       <nil>
-    DownwardAPI:             true
-QoS Class:                   BestEffort
-Node-Selectors:              <none>
-Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
-                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
-Events:
-  Type     Reason     Age                  From               Message
-  ----     ------     ----                 ----               -------
-  Normal   Scheduled  3m47s                default-scheduler  Successfully assigned default/goflow2-68844f4fb8-7h68j to che172rocky96.che.aricent.com
-  Normal   Pulling    34s (x5 over 3m46s)  kubelet            Pulling image "netsampler/goflow2:v0.5.2"
-  Warning  Failed     33s (x5 over 3m45s)  kubelet            Failed to pull image "netsampler/goflow2:v0.5.2": rpc error: code = NotFound desc = failed to pull and unpack image "docker.io/netsampler/goflow2:v0.5.2": failed to resolve reference "docker.io/netsampler/goflow2:v0.5.2": docker.io/netsampler/goflow2:v0.5.2: not found
-  Warning  Failed     33s (x5 over 3m45s)  kubelet            Error: ErrImagePull
-  Normal   BackOff    8s (x14 over 3m44s)  kubelet            Back-off pulling image "netsampler/goflow2:v0.5.2"
-  Warning  Failed     8s (x14 over 3m44s)  kubelet            Error: ImagePullBackOff
+NAME                       READY   STATUS             RESTARTS      AGE     IP            NODE                            NOMINATED NODE   READINESS GATES
+goflow2-58667858cb-lqc6x   0/1     CrashLoopBackOff   4 (61s ago)   2m31s   10.42.0.166   che172rocky96.che.aricent.com   <none>           <none>
+[root@che172rocky96 goflow2-deployment]# kubectl logs -n default deploy/goflow2
+flag provided but not defined: -format.kafka
+Usage of ./goflow2:
+  -addr string
+        HTTP server address (default ":8080")
+  -err.cnt int
+        Maximum errors per batch for muting (default 10)
+  -err.int duration
+        Maximum errors interval for muting (default 10s)
+  -format string
+        Choose the format (available: json, bin, text) (default "json")
+  -listen string
+        listen addresses (default "sflow://:6343,netflow://:2055")
+  -logfmt string
+        Log formatter (default "normal")
+  -loglevel string
+        Log level (default "info")
+  -mapping string
+        Configuration file for custom mappings
+  -produce string
+        Producer method (sample or raw) (default "sample")
+  -templates.path string
+        NetFlow/IPFIX templates list (default "/templates")
+  -transport string
+        Choose the transport (available: file, kafka) (default "file")
+  -transport.file string
+        File/console output (empty for stdout)
+  -transport.file.sep string
+        Line separator (default "\n")
+  -transport.kafka.brokers string
+        Kafka brokers list separated by commas (default "127.0.0.1:9092,[::1]:9092")
+  -transport.kafka.compression string
+        Kafka default compression
+  -transport.kafka.flushbytes int
+        Kafka flush bytes (default 104857600)
+  -transport.kafka.flushfreq duration
+        Kafka flush frequency (default 5s)
+  -transport.kafka.hashing
+        Enable partition hashing
+  -transport.kafka.maxmsgbytes int
+        Kafka max message bytes (default 1000000)
+  -transport.kafka.sasl string
+        Use SASL to connect to Kafka, available settings: none, plain, scram-sha256, scram-sha512 (TLS is recommended and the environment variables KAFKA_SASL_USER and KAFKA_SASL_PASS need to be set) (default "none")
+  -transport.kafka.srv string
+        SRV record containing a list of Kafka brokers (or use brokers)
+  -transport.kafka.tls
+        Use TLS to connect to Kafka
+  -transport.kafka.tls.ca string
+        Kafka certificate authority
+  -transport.kafka.tls.client string
+        Kafka client certificate
+  -transport.kafka.tls.insecure
+        Skips TLS verification
+  -transport.kafka.tls.key string
+        Kafka client key
+  -transport.kafka.topic string
+        Kafka topic to produce to (default "flow-messages")
+  -transport.kafka.version string
+        Kafka version (default "2.8.0")
+  -v    Print version
 [root@che172rocky96 goflow2-deployment]#
