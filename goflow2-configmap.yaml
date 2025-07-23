@@ -1,0 +1,14 @@
+# goflow2-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: goflow2-config
+  namespace: default
+data:
+  clickhouse.yaml: |
+    output:
+      clickhouse:
+        address: "tcp://clickhouse:9000"
+        database: "default"
+        table: "flows"
+        flushinterval: 5s
