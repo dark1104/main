@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: flowgen
+  namespace: default
+labels:
+  app: flowgen
+spec:
+  containers:
+  - name: flowgen
+    image: ghcr.io/netsampler/flowgen:latest
+    imagePullPolicy: IfNotPresent
+    args:
+      - "-npkts=1000"
+      - "-delay=1ms"
+      - "netflow://goflow2.default.svc.cluster.local:2055"
+  restartPolicy: Never
