@@ -1,0 +1,21 @@
+CREATE TABLE flows_kafka
+(
+  data String
+)
+ENGINE = Kafka
+SETTINGS kafka_broker_list = 'kafka:9092',
+         kafka_topic_list = 'flows',
+         kafka_group_name = 'ch-consumer',
+         kafka_format = 'JSONEachRow',
+         kafka_num_consumers = 1;
+
+CREATE TABLE flows_final
+(
+  data String
+)
+ENGINE = MergeTree()
+ORDER BY tuple();
+
+-- Materialize from Kafka to table
+CREATE MATERIALIZED VIEW flows_mv TO flows_final AS
+SELECT * FROM flows_kafka;
