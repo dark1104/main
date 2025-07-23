@@ -1,0 +1,38 @@
+# goflow2-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goflow2
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: goflow2
+  template:
+    metadata:
+      labels:
+        app: goflow2
+    spec:
+      containers:
+      - name: goflow2
+        image: ghcr.io/netsampler/goflow2:v0.6.2
+        imagePullPolicy: IfNotPresent
+        args:
+          - "-format.kafka"
+          - "-kafka.brokers=kafka:9092"
+          - "-kafka.topic=goflow"
+          - "-kafka.version=2.0.0"
+          - "-kafka.compression=gzip"
+          - "-kafka.flushinterval=1000"
+          # Uncomment below if using ClickHouse too:
+          # - "-format.clickhouse"
+          # - "-config=/conf/clickhouse.yaml"
+        volumeMounts:
+          - name: config
+            mountPath: /conf
+            readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: goflow2-config
