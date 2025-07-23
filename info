@@ -1,39 +1,52 @@
-[root@che172rocky96 goflow2-deployment]# kubectl logs -n default deploy/goflow2
-time=2025-07-23T10:50:29.723Z level=ERROR msg="error transporter" error="kafka: client has run out of available brokers to talk to: EOF for kafka transport"
-[root@che172rocky96 goflow2-deployment]# kubectl get svc -n default | grep kafka
-kafka                        ClusterIP   10.43.20.47     <none>        9092/TCP                                       23h
-kafka-broker-headless        ClusterIP   None            <none>        9094/TCP,9092/TCP                              23h
-kafka-controller-headless    ClusterIP   None            <none>        9094/TCP,9092/TCP,9093/TCP                     23h
+# goflow2-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goflow2
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: goflow2
+  template:
+    metadata:
+      labels:
+        app: goflow2
+    spec:
+      containers:
+      - name: goflow2
+        image: netsampler/goflow2:latest
+        imagePullPolicy: IfNotPresent
+        args:
+          - -transport.kafka.brokers=kafka-broker-0.kafka-broker-headless.default.svc.cluster.local:9092
+          - -transport=kafka
+          - -transport.kafka.topic=flows
+          - -format=json
+        volumeMounts:
+          - name: config
+            mountPath: /conf
+            readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: goflow2-config
+[root@che172rocky96 goflow2-deployment]# kubectl get pods -n default -o wide | grep kafka
+kafka-broker-0                      1/1     Running            0             23h     10.42.0.139   che172rocky96.che.aricent.com   <none>           <none>
+kafka-controller-0                  1/1     Running            0             23h     10.42.0.138   che172rocky96.che.aricent.com   <none>           <none>
 [root@che172rocky96 goflow2-deployment]# nano goflow2-deployment.yaml
-[root@che172rocky96 goflow2-deployment]# kubectl run -it --rm debug --image=busybox --restart=Never -- sh
+[root@che172rocky96 goflow2-deployment]# [root@che172rocky96 goflow2-deployment]# kubectl apply -f goflow2-deployment.yaml
+deployment.apps/goflow2 configured
+[root@che172rocky96 goflow2-deployment]# kubectl logs -n default deploy/goflow2
+time=2025-07-23T11:15:54.504Z level=ERROR msg="error transporter" error="kafka: client has run out of available brokers to talk to: EOF for kafka transport"
+[root@che172rocky96 goflow2-deployment]# kubectl run -it --rm dns-test --image=busybox --restart=Never -- sh
 If you don't see a command prompt, try pressing enter.
-/ # nsllokup kafka
-sh: nsllokup: not found
-/ # nslookup kafka
+/ # nslookup kafka-broker-0.kafka-broker-headless.default.svc.cluster.local
 Server:         10.43.0.10
 Address:        10.43.0.10:53
 
-** server can't find kafka.cluster.local: NXDOMAIN
 
-** server can't find kafka.cluster.local: NXDOMAIN
+Name:   kafka-broker-0.kafka-broker-headless.default.svc.cluster.local
+Address: 10.42.0.139
 
-** server can't find kafka.svc.cluster.local: NXDOMAIN
-
-
-** server can't find kafka.svc.cluster.local: NXDOMAIN
-
-Name:   kafka.default.svc.cluster.local
-Address: 10.43.20.47
-
-** server can't find kafka.che.aricent.com: NXDOMAIN
-
-** server can't find kafka.che.aricent.com: NXDOMAIN
-
-/ # kubectl get pods -n default | grep kafka
-sh: kubectl: not found
-/ # exit
-pod "debug" deleted
-pod default/debug terminated (Error)
-[root@che172rocky96 goflow2-deployment]# kubectl get pods -n default | grep kafka
-kafka-broker-0                      1/1     Running            0              23h
-kafka-controller-0                  1/1     Running            0              23
+/ #
