@@ -1,3 +1,38 @@
+# goflow2-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goflow2
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: goflow2
+  template:
+    metadata:
+      labels:
+        app: goflow2
+    spec:
+      containers:
+      - name: goflow2
+        image: netsampler/goflow2:latest
+        imagePullPolicy: IfNotPresent
+        args:
+          - -transport.kafka.brokers=sflow-kafka.sflow.svc.cluster.local:9092
+          - -transport=kafka
+          - -transport.kafka.topic=flows
+          - -format=pb
+          - -format.protobuf.fixedlen=true
+        volumeMounts:
+          - name: config
+            mountPath: /conf
+            readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: goflow2-config
+#############################
 [root@che172rocky96 goflow2-deployment]# kubectl logs -n default deploy/goflow2
 flag provided but not defined: -format.protobuf.fixedlen
 Usage of ./goflow2:
