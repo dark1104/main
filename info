@@ -1,52 +1,25 @@
-# goflow2-deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: goflow2
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: goflow2
-  template:
-    metadata:
-      labels:
-        app: goflow2
-    spec:
-      containers:
-      - name: goflow2
-        image: netsampler/goflow2:latest
-        imagePullPolicy: IfNotPresent
-        args:
-          - -transport.kafka.brokers=kafka-broker-0.kafka-broker-headless.default.svc.cluster.local:9092
-          - -transport=kafka
-          - -transport.kafka.topic=flows
-          - -format=json
-        volumeMounts:
-          - name: config
-            mountPath: /conf
-            readOnly: true
-      volumes:
-        - name: config
-          configMap:
-            name: goflow2-config
-[root@che172rocky96 goflow2-deployment]# kubectl get pods -n default -o wide | grep kafka
-kafka-broker-0                      1/1     Running            0             23h     10.42.0.139   che172rocky96.che.aricent.com   <none>           <none>
-kafka-controller-0                  1/1     Running            0             23h     10.42.0.138   che172rocky96.che.aricent.com   <none>           <none>
-[root@che172rocky96 goflow2-deployment]# nano goflow2-deployment.yaml
-[root@che172rocky96 goflow2-deployment]# [root@che172rocky96 goflow2-deployment]# kubectl apply -f goflow2-deployment.yaml
-deployment.apps/goflow2 configured
-[root@che172rocky96 goflow2-deployment]# kubectl logs -n default deploy/goflow2
-time=2025-07-23T11:15:54.504Z level=ERROR msg="error transporter" error="kafka: client has run out of available brokers to talk to: EOF for kafka transport"
-[root@che172rocky96 goflow2-deployment]# kubectl run -it --rm dns-test --image=busybox --restart=Never -- sh
-If you don't see a command prompt, try pressing enter.
-/ # nslookup kafka-broker-0.kafka-broker-headless.default.svc.cluster.local
-Server:         10.43.0.10
-Address:        10.43.0.10:53
-
-
-Name:   kafka-broker-0.kafka-broker-headless.default.svc.cluster.local
-Address: 10.42.0.139
-
-/ #
+listeners:
+  advertisedListeners: ''
+  client:
+    containerPort: 9092
+    name: CLIENT
+    protocol: SASL_PLAINTEXT
+    sslClientAuth: ''
+  controller:
+    containerPort: 9093
+    name: CONTROLLER
+    protocol: SASL_PLAINTEXT
+    sslClientAuth: ''
+  external:
+    containerPort: 9095
+    name: EXTERNAL
+    protocol: SASL_PLAINTEXT
+    sslClientAuth: ''
+  extraListeners: []
+  interbroker:
+    containerPort: 9094
+    name: INTERNAL
+    protocol: SASL_PLAINTEXT
+    sslClientAuth: ''
+  overrideListeners: ''
+  securityProtocolMap: ''
