@@ -22,6 +22,7 @@ spec:
           - -transport.kafka.brokers=kafka-broker-0.kafka-broker-headless.default.svc.cluster.local:9092
           - -transport=kafka
           - -transport.kafka.topic=flows
+          - -format=json
           #- "-format.kafka"
           #- "-kafka.brokers=kafka:9092"
           #- "-kafka.topic=goflow"
