@@ -1,0 +1,135 @@
+Thanks for the detailed information — we now have clear evidence of what’s going wrong.
+
+
+---
+
+🔍 Root Cause Identified: Kafka Is Auto-Deleting Empty Segments
+
+Your logs show:
+
+Deleting segments as the log has been deleted: LogSegment(baseOffset=0, size=0, ...)
+
+and
+
+Deleted log /bitnami/kafka/data/flows-0.f39c1daeaf584b75b8a3fed145c4c6e5-delete/00000000000000000000.log.deleted
+
+That means Kafka is:
+
+Creating the topic successfully
+
+But the messages are not being flushed to disk, and
+
+The log segment is empty and thus deleted automatically
+
+
+
+---
+
+✅ Let’s Fix It
+
+1. Ensure the Messages Are Actually Written
+
+The producer might think it succeeded but messages are not flushed due to either:
+
+Low throughput
+
+linger.ms / batch.size being too high
+
+acks=0 or misconfigured topic
+
+Something consuming the messages immediately and committing offsets without printing (like ClickHouse Kafka engine)
+
+
+To rule that out, manually force messages to flush immediately using:
+
+kafka-console-producer.sh \
+  --bootstrap-server localhost:9092 \
+  --topic flows \
+  --producer-property acks=all \
+  --producer-property linger.ms=0 \
+  --producer-property batch.size=1
+>{"data":"force-flush-1"}
+
+Then immediately check the offset with:
+
+kafka-run-class.sh kafka.tools.GetOffsetShell --broker-list localhost:9092 --topic flows
+
+You should see something like:
+
+flows:0:1
+
+If it's still 0 — Kafka didn’t record it.
+
+
+---
+
+2. Temporarily Disable Log Segment Deletion (For Debugging)
+
+Update topic config to never delete segments, just to debug:
+
+kafka-configs.sh --bootstrap-server localhost:9092 --entity-type topics --entity-name flows \
+  --alter --add-config retention.ms=604800000,segment.ms=3600000,cleanup.policy=delete,min.cleanable.dirty.ratio=0.01
+
+Alternatively, for testing, even set:
+
+--add-config segment.bytes=1000
+
+to force early segment creation and see if files are written.
+
+
+---
+
+3. Create a Fresh Test Topic and Avoid Auto-Creation
+
+Delete the flows topic completely:
+
+kafka-topics.sh --bootstrap-server localhost:9092 --delete --topic flows
+
+Then explicitly recreate it (with better debug settings):
+
+kafka-topics.sh --bootstrap-server localhost:9092 --create --topic flows \
+  --partitions 1 --replication-factor 1 \
+  --config retention.ms=604800000 \
+  --config segment.bytes=1000 \
+  --config min.cleanable.dirty.ratio=0.01 \
+  --config cleanup.policy=delete
+
+Now test produce-consume again:
+
+kafka-console-producer.sh --bootstrap-server localhost:9092 --topic flows
+>{"data":"final-check-1"}
+
+Then:
+
+kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic flows --from-beginning
+
+
+---
+
+4. Check That No One Is Consuming and Discarding
+
+Also, if the ClickHouse Kafka table (flows_kafka) is running and consuming from the same topic, it may consume and discard malformed data or crash silently.
+
+Temporarily scale down or disable the ClickHouse consumer/mview if needed:
+
+kubectl scale deploy clickhouse --replicas=0
+
+
+---
+
+✅ Recap of Fix Steps
+
+Step	What to Do
+
+🔄 Recreate topic	With better retention + force flush
+🧪 Test produce	linger.ms=0, batch.size=1, acks=all
+📦 Check offset	GetOffsetShell
+🧹 Check segment	/bitnami/kafka/data/flows-0/ file grows
+🚫 Disable other consumers	Stop ClickHouse or other Kafka clients
+🔁 Confirm persistence	Ensure .log file > 0 bytes
+
+
+
+---
+
+Once you're able to see the message in the topic, we can resume testing integration with ClickHouse or goflow2. Let me know if you'd like me to generate a known-good test message for that phase too.
