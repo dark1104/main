@@ -1,8 +1,8 @@
-I have no name!@kafka-broker-0:/$ kafka-topics.sh --list --bootstrap-server kafka:9092
-flows
+[root@che172rocky96 goflow2-deployment]# kubectl exec -it kafka-broker-0 -n default -- bash
+Defaulted container "kafka" out of: kafka, prepare-config (init)
 I have no name!@kafka-broker-0:/$ kafka-console-producer.sh --bootstrap-server localhost:9092 --topic flows
->{"sourceIPv4Address": "173.130.155.90", "destinationIPv4Address": "45.124.253.173", "protocolIdentifier": 1, "protocolName": "ICMP", "sourceTransportPort": 0, "destinationTransportPort": 0, "octetDeltaCount": 7389, "packetDeltaCount": 7, "flowStartMilliseconds": 1743321970000, "flowEndMilliseconds": 1743321970355, "mac_source": "3a:d1:ea:1f:39:54", "mac_destination": "40:8c:d1:8e:af:21", "application_name": "unknown", "http_url": null, "https_url_certificate": null, "datalink_vlan": 31, "flow_start_time": "2025-03-30T08:06:10.000000", "flow_end_time": "2025-03-30T08:06:10.355000", "bytes_accumulated": 7389, "tcp_retransmits": 0, "tcp_rst": 0, "tcp_fin": 0, "bytes_per_packet": 1055.5714285714287, "flow_duration_ms": 355, "flow_direction": "outbound", "profile_name": "web_servers"}
->{"sourceIPv4Address": "173.130.155.90", "destinationIPv4Address": "45.124.253.173", "protocolIdentifier": "ICMP", "protocolName": "ICMP", "sourceTransportPort": 0, "destinationTransportPort": 0, "octetDeltaCount": 7389, "packetDeltaCount": 7, "flowStartMilliseconds": 1743321970000, "flowEndMilliseconds": 1743321970355, "mac_source": "3a:d1:ea:1f:39:54", "mac_destination": "40:8c:d1:8e:af:21", "application_name": "unknown", "http_url": null, "https_url_certificate": null, "datalink_vlan": 31, "flow_start_time": "2025-03-30T08:06:10.000000", "flow_end_time": "2025-03-30T08:06:10.355000", "bytes_accumulated": 7389, "tcp_retransmits": 0, "tcp_rst": 0, "tcp_fin": 0, "bytes_per_packet": 1055.5714285714287, "flow_duration_ms": 355, "flow_direction": "outbound", "profile_name": "web_servers"}
->^CI have no name!@kafka-broker-0:/$ clear
-bash: clear: command not found
+>{"data":"test-flow-1"}
+>{"data":"test-flow-2"}
+>{"data":"test-flow-3"}
+>^CI have no name!@kafka-broker-0:/$
 I have no name!@kafka-broker-0:/$ kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic flows --from-beginning
