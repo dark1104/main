@@ -1,8 +1,21 @@
 [root@che172rocky96 goflow2-deployment]# kubectl exec -it kafka-broker-0 -n default -- bash
 Defaulted container "kafka" out of: kafka, prepare-config (init)
+I have no name!@kafka-broker-0:/$ kafka-topics.sh --bootstrap-server localhost:9092 --describe --topic flows
+Topic: flows    TopicId: WVQaQk2BQFKf3r8GKHOENQ PartitionCount: 1       ReplicationFactor: 1    Configs:
+        Topic: flows    Partition: 0    Leader: 0       Replicas: 0     Isr: 0  Elr:    LastKnownElr:
 I have no name!@kafka-broker-0:/$ kafka-console-producer.sh --bootstrap-server localhost:9092 --topic flows
->{"data":"test-flow-1"}
->{"data":"test-flow-2"}
->{"data":"test-flow-3"}
+>{"data":"test-123"}
 >^CI have no name!@kafka-broker-0:/$
-I have no name!@kafka-broker-0:/$ kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic flows --from-beginning
+I have no name!@kafka-broker-0:/$ kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic flows --from-beginning --group test-group-1
+^CProcessed a total of 0 messages
+I have no name!@kafka-broker-0:/$ kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic flows --from-beginning --consumer-property auto.offset.reset=earliest
+^CProcessed a total of 0 messages
+I have no name!@kafka-broker-0:/$ kafka-consumer-groups.sh --bootstrap-server localhost:9092 --all-groups --describe
+I have no name!@kafka-broker-0:/$ exit
+exit
+###########################
+[root@che172rocky96 goflow2-deployment]# kubectl logs kafka-broker-0 -n default | grep flows
+Defaulted container "kafka" out of: kafka, prepare-config (init)
+[root@che172rocky96 goflow2-deployment]# kubectl logs kafka-controller-0 -n default | grep flows
+Defaulted container "kafka" out of: kafka, prepare-config (init)
+[root@che172rocky96 goflow2-deployment]#
