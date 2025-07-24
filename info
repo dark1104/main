@@ -1,23 +1,27 @@
-[root@che172rocky96 goflow2-deployment]# kubectl exec -it kafka-broker-0 -n default -- bash
-Defaulted container "kafka" out of: kafka, prepare-config (init)
-I have no name!@kafka-broker-0:/$ kafka-topics.sh --delete --bootstrap-server kafka:9092 --topic flows
-I have no name!@kafka-broker-0:/$ kafka-topics.sh --create --bootstrap-server kafka:9092 --replication-factor 1 --partitions 1 --topic flows
-Error while executing topic command : Topic 'flows' already exists.
-[2025-07-24 06:58:18,254] ERROR org.apache.kafka.common.errors.TopicExistsException: Topic 'flows' already exists.
- (org.apache.kafka.tools.TopicCommand)
 I have no name!@kafka-broker-0:/$ kafka-topics.sh --bootstrap-server localhost:9092 --describe --topic flows
 Topic: flows    TopicId: JuIzU3PSQ66RMRazggQOjw PartitionCount: 1       ReplicationFactor: 1    Configs:
         Topic: flows    Partition: 0    Leader: 100     Replicas: 100   Isr: 100        Elr:    LastKnownElr:
-I have no name!@kafka-broker-0:/$ kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic flows --from-beginning --group test-group-1
-^CProcessed a total of 0 messages
+I have no name!@kafka-broker-0:/$ kafka-configs.sh --bootstrap-server localhost:9092 --entity-type topics --entity-name flows --alter --add-config retention.ms=604800000,segment.ms=3600000,cleanup.policy=delete
+Completed updating config for topic flows.
+I have no name!@kafka-broker-0:/$ ls -l /bitnami/kafka/data/flows-0/
+total 12
+-rw-r--r--. 1 1001 1001 10485760 Jul 24 06:58 00000000000000000000.index
+-rw-r--r--. 1 1001 1001      354 Jul 24 07:28 00000000000000000000.log
+-rw-r--r--. 1 1001 1001 10485756 Jul 24 06:58 00000000000000000000.timeindex
+-rw-r--r--. 1 1001 1001        8 Jul 24 06:58 leader-epoch-checkpoint
+-rw-r--r--. 1 1001 1001       43 Jul 24 06:58 partition.metadata
+I have no name!@kafka-broker-0:/$ du -sh /bitnami/kafka/data/flows-0/
+12K     /bitnami/kafka/data/flows-0/
 I have no name!@kafka-broker-0:/$ kafka-console-producer.sh --bootstrap-server localhost:9092 --topic flows
+>{"data":"test-123"}^CI have no name!@kafka-broker-0:/$ kafka-console-producer.sh --bootstrap-server localhost:9092 --topic flows
 >{"data":"test-123"}
->{"data":"test-1234"}
 >^CI have no name!@kafka-broker-0:/$
-I have no name!@kafka-broker-0:/$ kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic flows --from-beginning --group test-group-1
+I have no name!@kafka-broker-0:/$ kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic flows --from-beginning --group test-group-2
 ^CProcessed a total of 0 messages
-I have no name!@kafka-broker-0:/$
-
+^C^CI have no name!@kafka-broker-0:/$ ^C
+I have no name!@kafka-broker-0:/$ exit
+exit
+command terminated with exit code 130
 [root@che172rocky96 ~]# kubectl logs kafka-broker-0 -n default | grep flows
 Defaulted container "kafka" out of: kafka, prepare-config (init)
 [2025-07-24 06:57:37,625] INFO Sent auto-creation request for Set(flows) to the active controller. (kafka.server.DefaultAutoTopicCreationManager)
@@ -40,12 +44,25 @@ Defaulted container "kafka" out of: kafka, prepare-config (init)
 [2025-07-24 06:59:34,851] INFO Deleted offset index /bitnami/kafka/data/flows-0.f39c1daeaf584b75b8a3fed145c4c6e5-delete/00000000000000000000.index.deleted. (org.apache.kafka.storage.internals.log.LogSegment)
 [2025-07-24 06:59:34,852] INFO Deleted time index /bitnami/kafka/data/flows-0.f39c1daeaf584b75b8a3fed145c4c6e5-delete/00000000000000000000.timeindex.deleted. (org.apache.kafka.storage.internals.log.LogSegment)
 [2025-07-24 06:59:34,859] INFO Deleted log for partition flows-0 in /bitnami/kafka/data/flows-0.f39c1daeaf584b75b8a3fed145c4c6e5-delete. (kafka.log.LogManager)
+[2025-07-24 07:37:50,718] INFO [DynamicConfigPublisher broker id=100] Updating topic flows with new configuration : cleanup.policy -> delete,retention.ms -> 604800000,segment.ms -> 3600000 (kafka.server.metadata.DynamicConfigPublisher)
+[root@che172rocky96 ~]# kubectl logs kafka-broker-0 -n default | grep 'flows-0'
+Defaulted container "kafka" out of: kafka, prepare-config (init)
+[2025-07-24 06:57:37,668] INFO [ReplicaFetcherManager on broker 100] Removed fetcher for partitions Set(flows-0) (kafka.server.ReplicaFetcherManager)
+[2025-07-24 06:57:37,830] INFO [LogLoader partition=flows-0, dir=/bitnami/kafka/data] Loading producer state till offset 0 (org.apache.kafka.storage.internals.log.UnifiedLog)
+[2025-07-24 06:57:37,840] INFO Created log for partition flows-0 in /bitnami/kafka/data/flows-0 with properties {} (kafka.log.LogManager)
+[2025-07-24 06:57:37,842] INFO [Partition flows-0 broker=100] No checkpointed highwatermark is found for partition flows-0 (kafka.cluster.Partition)
+[2025-07-24 06:57:37,921] INFO [Partition flows-0 broker=100] Log loaded for partition flows-0 with initial high watermark 0 (kafka.cluster.Partition)
+[2025-07-24 06:58:34,771] INFO [ReplicaFetcherManager on broker 100] Removed fetcher for partitions Set(flows-0) (kafka.server.ReplicaFetcherManager)
+[2025-07-24 06:58:34,772] INFO [ReplicaAlterLogDirsManager on broker 100] Removed fetcher for partitions Set(flows-0) (kafka.server.ReplicaAlterLogDirsManager)
+[2025-07-24 06:58:34,828] INFO Log for partition flows-0 is renamed to /bitnami/kafka/data/flows-0.f39c1daeaf584b75b8a3fed145c4c6e5-delete and is scheduled for deletion (kafka.log.LogManager)
+[2025-07-24 06:58:35,585] INFO [ReplicaFetcherManager on broker 100] Removed fetcher for partitions Set(flows-0) (kafka.server.ReplicaFetcherManager)
+[2025-07-24 06:58:35,593] INFO [LogLoader partition=flows-0, dir=/bitnami/kafka/data] Loading producer state till offset 0 (org.apache.kafka.storage.internals.log.UnifiedLog)
+[2025-07-24 06:58:35,594] INFO Created log for partition flows-0 in /bitnami/kafka/data/flows-0 with properties {} (kafka.log.LogManager)
+[2025-07-24 06:58:35,595] INFO [Partition flows-0 broker=100] Log loaded for partition flows-0 with initial high watermark 0 (kafka.cluster.Partition)
+[2025-07-24 06:59:34,841] INFO [LocalLog partition=flows-0, dir=/bitnami/kafka/data/flows-0] Deleting segments as the log has been deleted: LogSegment(baseOffset=0, size=0, lastModifiedTime=1753340257826, largestRecordTimestamp=-1) (org.apache.kafka.storage.internals.log.LocalLog)
+[2025-07-24 06:59:34,844] INFO [LocalLog partition=flows-0, dir=/bitnami/kafka/data/flows-0] Deleting segment files LogSegment(baseOffset=0, size=0, lastModifiedTime=1753340257826, largestRecordTimestamp=-1) (org.apache.kafka.storage.internals.log.LocalLog)
+[2025-07-24 06:59:34,847] INFO Deleted log /bitnami/kafka/data/flows-0.f39c1daeaf584b75b8a3fed145c4c6e5-delete/00000000000000000000.log.deleted. (org.apache.kafka.storage.internals.log.LogSegment)
+[2025-07-24 06:59:34,851] INFO Deleted offset index /bitnami/kafka/data/flows-0.f39c1daeaf584b75b8a3fed145c4c6e5-delete/00000000000000000000.index.deleted. (org.apache.kafka.storage.internals.log.LogSegment)
+[2025-07-24 06:59:34,852] INFO Deleted time index /bitnami/kafka/data/flows-0.f39c1daeaf584b75b8a3fed145c4c6e5-delete/00000000000000000000.timeindex.deleted. (org.apache.kafka.storage.internals.log.LogSegment)
+[2025-07-24 06:59:34,859] INFO Deleted log for partition flows-0 in /bitnami/kafka/data/flows-0.f39c1daeaf584b75b8a3fed145c4c6e5-delete. (kafka.log.LogManager)
 [root@che172rocky96 ~]#
-
-
-I have no name!@kafka-broker-0:/$ kafka-console-producer.sh --bootstrap-server localhost:9092 --topic flows --producer-property acks=al
-l --producer-property retries=3
->{"data":"manual-test-1"}
->^CI have no name!@kafka-broker-0:/$
-I have no name!@kafka-broker-0:/$ kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic flows --from-beginning
-^CProcessed a total of 0 messages
