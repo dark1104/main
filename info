@@ -17,3 +17,22 @@ I have no name!@kafka-broker-0:/$ kafka-console-producer.sh --bootstrap-server l
 I have no name!@kafka-broker-0:/$ kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic flows --from-beginning --group test-group-1
 ^CProcessed a total of 0 messages
 I have no name!@kafka-broker-0:/$
+
+I have no name!@kafka-broker-0:/$ kafka-run-class.sh kafka.tools.DumpLogSegments --files /bitnami/kafka/data/kafka-logs/flows-0/00000000000000000000.log --print-data-log
+Dumping /bitnami/kafka/data/kafka-logs/flows-0/00000000000000000000.log
+Log starting offset: 0
+Exception in thread "main" java.nio.file.NoSuchFileException: /bitnami/kafka/data/kafka-logs/flows-0/00000000000000000000.log
+        at java.base/sun.nio.fs.UnixException.translateToIOException(Unknown Source)
+        at java.base/sun.nio.fs.UnixException.rethrowAsIOException(Unknown Source)
+        at java.base/sun.nio.fs.UnixException.rethrowAsIOException(Unknown Source)
+        at java.base/sun.nio.fs.UnixFileSystemProvider.newFileChannel(Unknown Source)
+        at java.base/java.nio.channels.FileChannel.open(Unknown Source)
+        at java.base/java.nio.channels.FileChannel.open(Unknown Source)
+        at org.apache.kafka.common.record.FileRecords.openChannel(FileRecords.java:474)
+        at org.apache.kafka.common.record.FileRecords.open(FileRecords.java:429)
+        at kafka.tools.DumpLogSegments$.dumpLog(DumpLogSegments.scala:280)
+        at kafka.tools.DumpLogSegments$.$anonfun$main$1(DumpLogSegments.scala:80)
+        at kafka.tools.DumpLogSegments$.$anonfun$main$1$adapted(DumpLogSegments.scala:71)
+        at scala.collection.ArrayOps$.foreach$extension(ArrayOps.scala:1323)
+        at kafka.tools.DumpLogSegments$.main(DumpLogSegments.scala:71)
+        at kafka.tools.DumpLogSegments.main(DumpLogSegments.scala)
