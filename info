@@ -18,21 +18,26 @@ I have no name!@kafka-broker-0:/$ kafka-console-consumer.sh --bootstrap-server l
 ^CProcessed a total of 0 messages
 I have no name!@kafka-broker-0:/$
 
-I have no name!@kafka-broker-0:/$ kafka-run-class.sh kafka.tools.DumpLogSegments --files /bitnami/kafka/data/kafka-logs/flows-0/00000000000000000000.log --print-data-log
-Dumping /bitnami/kafka/data/kafka-logs/flows-0/00000000000000000000.log
-Log starting offset: 0
-Exception in thread "main" java.nio.file.NoSuchFileException: /bitnami/kafka/data/kafka-logs/flows-0/00000000000000000000.log
-        at java.base/sun.nio.fs.UnixException.translateToIOException(Unknown Source)
-        at java.base/sun.nio.fs.UnixException.rethrowAsIOException(Unknown Source)
-        at java.base/sun.nio.fs.UnixException.rethrowAsIOException(Unknown Source)
-        at java.base/sun.nio.fs.UnixFileSystemProvider.newFileChannel(Unknown Source)
-        at java.base/java.nio.channels.FileChannel.open(Unknown Source)
-        at java.base/java.nio.channels.FileChannel.open(Unknown Source)
-        at org.apache.kafka.common.record.FileRecords.openChannel(FileRecords.java:474)
-        at org.apache.kafka.common.record.FileRecords.open(FileRecords.java:429)
-        at kafka.tools.DumpLogSegments$.dumpLog(DumpLogSegments.scala:280)
-        at kafka.tools.DumpLogSegments$.$anonfun$main$1(DumpLogSegments.scala:80)
-        at kafka.tools.DumpLogSegments$.$anonfun$main$1$adapted(DumpLogSegments.scala:71)
-        at scala.collection.ArrayOps$.foreach$extension(ArrayOps.scala:1323)
-        at kafka.tools.DumpLogSegments$.main(DumpLogSegments.scala:71)
-        at kafka.tools.DumpLogSegments.main(DumpLogSegments.scala)
+[root@che172rocky96 ~]# kubectl logs kafka-broker-0 -n default | grep flows
+Defaulted container "kafka" out of: kafka, prepare-config (init)
+[2025-07-24 06:57:37,625] INFO Sent auto-creation request for Set(flows) to the active controller. (kafka.server.DefaultAutoTopicCreationManager)
+[2025-07-24 06:57:37,668] INFO [ReplicaFetcherManager on broker 100] Removed fetcher for partitions Set(flows-0) (kafka.server.ReplicaFetcherManager)
+[2025-07-24 06:57:37,830] INFO [LogLoader partition=flows-0, dir=/bitnami/kafka/data] Loading producer state till offset 0 (org.apache.kafka.storage.internals.log.UnifiedLog)
+[2025-07-24 06:57:37,840] INFO Created log for partition flows-0 in /bitnami/kafka/data/flows-0 with properties {} (kafka.log.LogManager)
+[2025-07-24 06:57:37,842] INFO [Partition flows-0 broker=100] No checkpointed highwatermark is found for partition flows-0 (kafka.cluster.Partition)
+[2025-07-24 06:57:37,921] INFO [Partition flows-0 broker=100] Log loaded for partition flows-0 with initial high watermark 0 (kafka.cluster.Partition)
+[2025-07-24 06:58:34,771] INFO [ReplicaFetcherManager on broker 100] Removed fetcher for partitions Set(flows-0) (kafka.server.ReplicaFetcherManager)
+[2025-07-24 06:58:34,772] INFO [ReplicaAlterLogDirsManager on broker 100] Removed fetcher for partitions Set(flows-0) (kafka.server.ReplicaAlterLogDirsManager)
+[2025-07-24 06:58:34,828] INFO Log for partition flows-0 is renamed to /bitnami/kafka/data/flows-0.f39c1daeaf584b75b8a3fed145c4c6e5-delete and is scheduled for deletion (kafka.log.LogManager)
+[2025-07-24 06:58:35,555] INFO Sent auto-creation request for Set(flows) to the active controller. (kafka.server.DefaultAutoTopicCreationManager)
+[2025-07-24 06:58:35,585] INFO [ReplicaFetcherManager on broker 100] Removed fetcher for partitions Set(flows-0) (kafka.server.ReplicaFetcherManager)
+[2025-07-24 06:58:35,593] INFO [LogLoader partition=flows-0, dir=/bitnami/kafka/data] Loading producer state till offset 0 (org.apache.kafka.storage.internals.log.UnifiedLog)
+[2025-07-24 06:58:35,594] INFO Created log for partition flows-0 in /bitnami/kafka/data/flows-0 with properties {} (kafka.log.LogManager)
+[2025-07-24 06:58:35,595] INFO [Partition flows-0 broker=100] Log loaded for partition flows-0 with initial high watermark 0 (kafka.cluster.Partition)
+[2025-07-24 06:59:34,841] INFO [LocalLog partition=flows-0, dir=/bitnami/kafka/data/flows-0] Deleting segments as the log has been deleted: LogSegment(baseOffset=0, size=0, lastModifiedTime=1753340257826, largestRecordTimestamp=-1) (org.apache.kafka.storage.internals.log.LocalLog)
+[2025-07-24 06:59:34,844] INFO [LocalLog partition=flows-0, dir=/bitnami/kafka/data/flows-0] Deleting segment files LogSegment(baseOffset=0, size=0, lastModifiedTime=1753340257826, largestRecordTimestamp=-1) (org.apache.kafka.storage.internals.log.LocalLog)
+[2025-07-24 06:59:34,847] INFO Deleted log /bitnami/kafka/data/flows-0.f39c1daeaf584b75b8a3fed145c4c6e5-delete/00000000000000000000.log.deleted. (org.apache.kafka.storage.internals.log.LogSegment)
+[2025-07-24 06:59:34,851] INFO Deleted offset index /bitnami/kafka/data/flows-0.f39c1daeaf584b75b8a3fed145c4c6e5-delete/00000000000000000000.index.deleted. (org.apache.kafka.storage.internals.log.LogSegment)
+[2025-07-24 06:59:34,852] INFO Deleted time index /bitnami/kafka/data/flows-0.f39c1daeaf584b75b8a3fed145c4c6e5-delete/00000000000000000000.timeindex.deleted. (org.apache.kafka.storage.internals.log.LogSegment)
+[2025-07-24 06:59:34,859] INFO Deleted log for partition flows-0 in /bitnami/kafka/data/flows-0.f39c1daeaf584b75b8a3fed145c4c6e5-delete. (kafka.log.LogManager)
+[root@che172rocky96 ~]#
