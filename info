@@ -1,28 +1,36 @@
-I have no name!@kafka-broker-0:/$ KAFKA_OPTS="-Dlog4j.configuration=file:/opt/bitnami/kafka/config/log4j.properties" kafka-console-producer.sh   --bootstrap-server kafka-broker-0.kafka-broker-headless.default.svc.cluster.local:9092   --topic flows   --producer-property acks=all   --producer-property retries=3
->{"data":"manual_1"}
->{"data":"manual_2"}
->^CI have no name!@kafka-broker-0:/$
-I have no name!@kafka-broker-0:/$ kafka-topics.sh --describe \
-  --bootstrap-server kafka-broker-0.kafka-broker-headless.default.svc.cluster.local:9092 \
-  --topic flows
-Topic: flows    TopicId: IrQYIWz5Qj2EGzfpvqMylQ PartitionCount: 1       ReplicationFactor: 1    Configs:
-        Topic: flows    Partition: 0    Leader: 100     Replicas: 100   Isr: 100        Elr:    LastKnownElr:
-I have no name!@kafka-broker-0:/$ ls -lh /bitnami/kafka/data/flows-0/*.log
--rw-r--r--. 1 1001 1001 412 Jul 29 09:58 /bitnami/kafka/data/flows-0/00000000000000000000.log
-I have no name!@kafka-broker-0:/$ kafka-console-consumer.sh \
-  --bootstrap-server kafka-broker-0.kafka-broker-headless.default.svc.cluster.local:9092 \
-  --topic flows \
-  --from-beginning \
-  --group dummy-test-group-123
-^CI have no name!@kafka-broker-0:/$
-I have no name!@kafka-broker-0:/$ kafka-topics.sh --create \
-  --bootstrap-server kafka-broker-0.kafka-broker-headless.default.svc.cluster.local:9092 \
-  --replication-factor 1 --partitions 1 \
-  --topic testtopic123
-Created topic testtopic123.
-I have no name!@kafka-broker-0:/$ kafka-console-producer.sh --bootstrap-server kafka-broker-0.kafka-broker-headless.default.svc.cluster.local:9092 --topic testtopic123
->{"data":"hello-testtopic"}
->^CI have no name!@kafka-broker-0:/$
-I have no name!@kafka-broker-0:/$ kafka-console-consumer.sh --bootstrap-server kafka-broker-0.kafka-broker-headless.default.svc.cluster.local:9092 --topic testtopic123 --from-beginning
-^CProcessed a total of 0 messages
-I have no name!@kafka-broker-0:/$
+I have no name!@kafka-broker-0:/$ cat /opt/bitnami/kafka/config/server.properties
+advertised.listeners=CLIENT://kafka-broker-0.kafka-broker-headless.default.svc.cluster.local:9092,INTERNAL://kafka-broker-0.kafka-broker-headless.default.svc.cluster.local:9094
+controller.listener.names=CONTROLLER
+controller.quorum.bootstrap.servers=kafka-controller-0.kafka-controller-headless.default.svc.cluster.local:9093
+inter.broker.listener.name=INTERNAL
+listener.security.protocol.map=CONTROLLER:PLAINTEXT,CLIENT:PLAINTEXT,INTERNAL:PLAINTEXT
+listeners=CLIENT://:9092,INTERNAL://:9094
+log.dir=/bitnami/kafka/data
+logs.dir=/opt/bitnami/kafka/logs
+process.roles=broker
+node.id=100
+I have no name!@kafka-broker-0:/$ exit
+exit
+[root@che172rocky96 ~]# kubectl get svc kafka-broker-headless -n default -o wide
+NAME                    TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)             AGE     SELECTOR
+kafka-broker-headless   ClusterIP   None         <none>        9094/TCP,9092/TCP   6d22h   app.kubernetes.io/component=broker,app.kubernetes.io/instance=kafka,app.kubernetes.io/name=kafka,app.kubernetes.io/part-of=kafka
+[root@che172rocky96 ~]#
+[root@che172rocky96 ~]# kubectl logs kafka-broker-0 -n default | grep -i listener
+Defaulted container "kafka" out of: kafka, prepare-config (init)
+[2025-07-29 09:29:15,454] INFO [RaftManager id=100] Loading snapshot (OffsetAndEpoch(offset=1189827, epoch=2)) since log start offset (0) is greater than the internal listener's next offset (-1) (org.apache.kafka.raft.internals.KRaftControlRecordStateMachine)
+[2025-07-29 09:29:15,532] INFO [RaftManager id=100] Latest set of voters is VoterSet(voters={0=VoterNode(voterKey=ReplicaKey(id=0, directoryId=nBmhNAmsZGJqOVojCbSTSA), listeners=Endpoints(endpoints={ListenerName(CONTROLLER)=kafka-controller-0.kafka-controller-headless.default.svc.cluster.local/<unresolved>:9093}), supportedKRaftVersion=SupportedVersionRange[min_version:0, max_version:1])}) at offset 1189826 (org.apache.kafka.raft.internals.KRaftControlRecordStateMachine)
+[2025-07-29 09:29:15,925] INFO [RaftManager id=100] Starting voters are VoterSet(voters={0=VoterNode(voterKey=ReplicaKey(id=0, directoryId=nBmhNAmsZGJqOVojCbSTSA), listeners=Endpoints(endpoints={ListenerName(CONTROLLER)=kafka-controller-0.kafka-controller-headless.default.svc.cluster.local/<unresolved>:9093}), supportedKRaftVersion=SupportedVersionRange[min_version:0, max_version:1])}) (org.apache.kafka.raft.KafkaRaftClient)
+[2025-07-29 09:29:16,035] INFO [RaftManager id=100] Attempting durable transition to FollowerState(fetchTimeoutMs=2000, epoch=2, leader=0, leaderEndpoints=Endpoints(endpoints={ListenerName(CONTROLLER)=kafka-controller-0.kafka-controller-headless.default.svc.cluster.local/<unresolved>:9093}), votedKey=Optional.empty, voters=[0], highWatermark=Optional.empty, fetchingSnapshot=Optional.empty) from null (org.apache.kafka.raft.QuorumState)
+[2025-07-29 09:29:16,227] INFO [RaftManager id=100] Completed transition to FollowerState(fetchTimeoutMs=2000, epoch=2, leader=0, leaderEndpoints=Endpoints(endpoints={ListenerName(CONTROLLER)=kafka-controller-0.kafka-controller-headless.default.svc.cluster.local/<unresolved>:9093}), votedKey=Optional.empty, voters=[0], highWatermark=Optional.empty, fetchingSnapshot=Optional.empty) from null (org.apache.kafka.raft.QuorumState)
+[2025-07-29 09:29:18,243] INFO [RaftManager id=100] Registered the listener org.apache.kafka.image.loader.MetadataLoader@1408213684 (org.apache.kafka.raft.KafkaRaftClient)
+[2025-07-29 09:29:20,732] INFO [SocketServer listenerType=BROKER, nodeId=100] Created data-plane acceptor and processors for endpoint : ListenerName(CLIENT) (kafka.network.SocketServer)
+[2025-07-29 09:29:20,820] INFO [SocketServer listenerType=BROKER, nodeId=100] Created data-plane acceptor and processors for endpoint : ListenerName(INTERNAL) (kafka.network.SocketServer)
+        advertised.listeners = CLIENT://kafka-broker-0.kafka-broker-headless.default.svc.cluster.local:9092,INTERNAL://kafka-broker-0.kafka-broker-headless.default.svc.cluster.local:9094
+        controller.listener.names = CONTROLLER
+        early.start.listeners = null
+        inter.broker.listener.name = INTERNAL
+        listener.security.protocol.map = CONTROLLER:PLAINTEXT,CLIENT:PLAINTEXT,INTERNAL:PLAINTEXT
+        listeners = CLIENT://:9092,INTERNAL://:9094
+        remote.log.metadata.manager.listener.name = null
+[2025-07-29 09:29:24,726] INFO [SocketServer listenerType=BROKER, nodeId=100] Enabling request processing. (kafka.network.SocketServer)
+[root@che172rocky96 ~]#
