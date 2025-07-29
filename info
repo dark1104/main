@@ -1,5 +1,141 @@
-I have no name!@kafka-broker-0:/$ kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic flows --from-beginning
-[2025-07-29 09:28:42,817] WARN [Consumer clientId=console-consumer, groupId=console-consumer-44356] Connection to node -1 (localhost/127.0.0.1:9092) could not be established. Node may not be available. (org.apache.kafka.clients.NetworkClient)
-[2025-07-29 09:28:42,818] WARN [Consumer clientId=console-consumer, groupId=console-consumer-44356] Bootstrap broker localhost:9092 (id: -1 rack: null isFenced: false) disconnected (org.apache.kafka.clients.NetworkClient)
-[2025-07-29 09:28:43,820] WARN [Consumer clientId=console-consumer, groupId=console-consumer-44356] Connection to node -1 (localhost/127.0.0.1:9092) could not be established. Node may not be available. (org.apache.kafka.clients.NetworkClient)
-[2025-07-29 09:28:43,820] WARN [Consumer clientId=console-consumer, groupId=console-consumer-44356] Bootstrap broker localhost:9092 (id: -1 rack: null isFenced: false) disconnected (org.apache.kafka.clients.NetworkClient)
+Thanks for confirming. Since even with the correct hostname (kafka-broker-0.kafka-broker-headless.default.svc.cluster.local:9092) you're not able to consume the messages you just produced to the flows topic, and yet the topic exists, this likely boils down to one (or more) of the following root issues:
+
+
+---
+
+✅ Let's Walk Through a Debug Checklist
+
+🔍 1. Verify Message Production Is Actually Successful
+
+Run producer with debug logs enabled and see if Kafka is acknowledging:
+
+KAFKA_OPTS="-Dlog4j.configuration=file:/opt/bitnami/kafka/config/log4j.properties" \
+kafka-console-producer.sh \
+  --bootstrap-server kafka-broker-0.kafka-broker-headless.default.svc.cluster.local:9092 \
+  --topic flows \
+  --producer-property acks=all \
+  --producer-property retries=3
+
+Then type:
+
+{"data":"manual-debug-test"}
+
+Then press Enter and Ctrl+C.
+
+If it hangs after message input, it means the producer is not successfully communicating with the broker even though the hostname resolves.
+
+
+---
+
+🔍 2. Check Partition Leader and Broker Health
+
+Run:
+
+kafka-topics.sh --describe \
+  --bootstrap-server kafka-broker-0.kafka-broker-headless.default.svc.cluster.local:9092 \
+  --topic flows
+
+Ensure the following:
+
+Leader is assigned
+
+Isr (in-sync replica) is present
+
+
+You mentioned:
+
+Leader: 100  Replicas: 100  Isr: 100
+
+That is OK ✅
+
+
+---
+
+🔍 3. Check Log Size in Kafka Data Directory
+
+Check log size increasing:
+
+ls -lh /bitnami/kafka/data/flows-0/*.log
+
+If the .log file never grows, the message is never written to disk = producer failed.
+
+
+---
+
+🔍 4. Try to Write Using Another Kafka CLI Tool
+
+Use kcat (formerly kafkacat) for testing outside the pod, for simpler debugging:
+
+If available in your local machine or jumpbox:
+
+kcat -b <EXTERNAL_KAFKA_SERVICE> -t flows -P
+{"data":"test-from-kcat"}
+
+Then to consume:
+
+kcat -b <EXTERNAL_KAFKA_SERVICE> -t flows -C -o beginning
+
+
+---
+
+🔍 5. Run the Producer and Consumer with the Same Group ID
+
+Sometimes consumer group offset tricks cause the message to be marked consumed already.
+
+Try consuming with --group dummy-test-group-123:
+
+kafka-console-consumer.sh \
+  --bootstrap-server kafka-broker-0.kafka-broker-headless.default.svc.cluster.local:9092 \
+  --topic flows \
+  --from-beginning \
+  --group dummy-test-group-123
+
+
+---
+
+🔍 6. Create a New Test Topic and Test
+
+There may be some corruption or bad state in the flows topic.
+
+Try:
+
+kafka-topics.sh --create \
+  --bootstrap-server kafka-broker-0.kafka-broker-headless.default.svc.cluster.local:9092 \
+  --replication-factor 1 --partitions 1 \
+  --topic testtopic123
+
+Then:
+
+kafka-console-producer.sh --bootstrap-server kafka-broker-0.kafka-broker-headless.default.svc.cluster.local:9092 --topic testtopic123
+{"data":"hello-testtopic"}
+
+And:
+
+kafka-console-consumer.sh --bootstrap-server kafka-broker-0.kafka-broker-headless.default.svc.cluster.local:9092 --topic testtopic123 --from-beginning
+
+If testtopic123 works, then flows is possibly broken or stuck.
+
+
+---
+
+🔍 7. Double-Check ClickHouse is NOT Auto-consuming
+
+If ClickHouse Kafka Engine (via flows_kafka) is already consuming, it may "eat" messages before you see them in the consumer. Disable any ClickHouse Kafka engine while testing, or comment out the flows_mv Materialized View temporarily.
+
+
+---
+
+🔁 Summary of Suggested Next Steps
+
+Step	Task
+
+✅	Try producer with debug logging
+✅	Try consumer with new group ID
+✅	Try a brand new topic (e.g. testtopic123)
+✅	Verify log file for the partition actually changes in size
+✅	Try producing using kcat if available
+⚠️	Pause ClickHouse Kafka Engine view if active
+🧹	As last resort, delete and recreate topic flows cleanly
+
+
+Let me know the outcome of these — especially Step 6 (new topic test). That will confirm whether it's topic-specific or cluster-wide.
