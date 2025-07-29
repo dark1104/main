@@ -34,3 +34,24 @@ Defaulted container "kafka" out of: kafka, prepare-config (init)
         remote.log.metadata.manager.listener.name = null
 [2025-07-29 09:29:24,726] INFO [SocketServer listenerType=BROKER, nodeId=100] Enabling request processing. (kafka.network.SocketServer)
 [root@che172rocky96 ~]#
+
+
+
+
+
+I have no name!@kafka-broker-0:/$ kafka-dump-log.sh --files /bitnami/kafka/data/flows-0/00000000000000000000.log --print-data-log
+Dumping /bitnami/kafka/data/flows-0/00000000000000000000.log
+Log starting offset: 0
+baseOffset: 0 lastOffset: 0 count: 1 baseSequence: 0 lastSequence: 0 producerId: 1000 producerEpoch: 0 partitionLeaderEpoch: 2 isTransactional: false isControl: false deleteHorizonMs: OptionalLong.empty position: 0 CreateTime: 1753782378419 size: 85 magic: 2 compresscodec: none crc: 3286212329 isvalid: true
+| offset: 0 CreateTime: 1753782378419 keySize: -1 valueSize: 17 sequence: 0 headerKeys: [] payload: {"data":"data-1"}
+baseOffset: 1 lastOffset: 1 count: 1 baseSequence: 1 lastSequence: 1 producerId: 1000 producerEpoch: 0 partitionLeaderEpoch: 2 isTransactional: false isControl: false deleteHorizonMs: OptionalLong.empty position: 85 CreateTime: 1753782392094 size: 85 magic: 2 compresscodec: none crc: 897914407 isvalid: true
+| offset: 1 CreateTime: 1753782392094 keySize: -1 valueSize: 17 sequence: 1 headerKeys: [] payload: {"data":"data-2"}
+baseOffset: 2 lastOffset: 2 count: 1 baseSequence: 0 lastSequence: 0 producerId: 1001 producerEpoch: 0 partitionLeaderEpoch: 2 isTransactional: false isControl: false deleteHorizonMs: OptionalLong.empty position: 170 CreateTime: 1753783062010 size: 68 magic: 2 compresscodec: none crc: 191704903 isvalid: true
+| offset: 2 CreateTime: 1753783062010 keySize: -1 valueSize: 0 sequence: 0 headerKeys: [] payload:
+baseOffset: 3 lastOffset: 3 count: 1 baseSequence: 1 lastSequence: 1 producerId: 1001 producerEpoch: 0 partitionLeaderEpoch: 2 isTransactional: false isControl: false deleteHorizonMs: OptionalLong.empty position: 238 CreateTime: 1753783089374 size: 87 magic: 2 compresscodec: none crc: 3663765236 isvalid: true
+| offset: 3 CreateTime: 1753783089374 keySize: -1 valueSize: 19 sequence: 1 headerKeys: [] payload: {"data":"manual_1"}
+baseOffset: 4 lastOffset: 4 count: 1 baseSequence: 2 lastSequence: 2 producerId: 1001 producerEpoch: 0 partitionLeaderEpoch: 2 isTransactional: false isControl: false deleteHorizonMs: OptionalLong.empty position: 325 CreateTime: 1753783104669 size: 87 magic: 2 compresscodec: none crc: 886210138 isvalid: true
+| offset: 4 CreateTime: 1753783104669 keySize: -1 valueSize: 19 sequence: 2 headerKeys: [] payload: {"data":"manual_2"}
+baseOffset: 5 lastOffset: 5 count: 1 baseSequence: 0 lastSequence: 0 producerId: 1003 producerEpoch: 0 partitionLeaderEpoch: 2 isTransactional: false isControl: false deleteHorizonMs: OptionalLong.empty position: 412 CreateTime: 1753784423967 size: 83 magic: 2 compresscodec: none crc: 3711359471 isvalid: true
+| offset: 5 CreateTime: 1753784423967 keySize: -1 valueSize: 15 sequence: 0 headerKeys: [] payload: {"data":"msgs"}
+I have no name!@kafka-broker-0:/$
